@@ -162,7 +162,7 @@ def convert(args):
     files = sorted(files)
 
     print(f"Converting {len(files)} files from AAC to WAV")
-    with tqdm(total=len(files)) as pbar, multiprocessing.Pool() as workers:
+    with tqdm(total=len(files)) as pbar, multiprocessing.Pool(8) as workers:
         for file in files:
             workers.apply_async(
                 convert_file,

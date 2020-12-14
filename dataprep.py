@@ -4,6 +4,7 @@
 # Requirement: ffmpeg and wget running on a Linux system.
 
 import argparse
+import multiprocessing
 import os
 import pathlib
 import subprocess
@@ -13,6 +14,8 @@ import hashlib
 import time
 import glob
 import tarfile
+import threading
+
 from zipfile import ZipFile
 from tqdm import tqdm
 from scipy.io import wavfile
@@ -96,7 +99,8 @@ def concatenate(args, lines):
         md5gt = line.split()[2]
 
         infile_path = pathlib.Path(args.save_path) / infile
-        outfile_path = pathlib.Path(args.save_path) / outfile
+        outfile_path = pathlib.Path(args.save_path) / "concat" / outfile
+        outfile_path.parent.mkdir(parents=True, exist_ok=True)
 
         ## Concatenate files
         out = subprocess.call(
@@ -121,9 +125,7 @@ def full_extract(args, fname):
         with tarfile.open(fname, "r:gz") as tar:
             tar.extractall(args.save_path)
     elif fname.endswith(".zip"):
-        print(fname)
         path = pathlib.Path(fname)
-        print(path, path.exists())
         with ZipFile(fname, "r") as zf:
             zf.extractall(args.save_path)
 
@@ -144,20 +146,33 @@ def part_extract(args, fname, target):
 ## ========== ===========
 ## Convert
 ## ========== ===========
+def convert_file(fname):
+    outfile = fname.replace(".m4a", ".wav")
+    out = subprocess.call(
+        f"ffmpeg -y -i {str(fname)} -ac 1 -vn -acodec pcm_s16le -ar 16000 {str(outfile)} >/dev/null 2>/dev/null",
+        shell=True,
+    )
+    if out != 0:
+        raise ValueError(f"Conversion failed {str(fname)}")
+
+
 def convert(args):
-    files = pathlib.Path(args.save_path).rglob(".m4a")
+    files = pathlib.Path(args.save_path).rglob("*.m4a")
     files = [f for f in files]
     files = sorted(files)
 
-    print("Converting files from AAC to WAV")
-    for fname in tqdm(files):
-        outfile = fname.replace(".m4a", ".wav")
-        out = subprocess.call(
-            f"ffmpeg -y -i {str(fname)} -ac 1 -vn -acodec pcm_s16le -ar 16000 {str(outfile)} >/dev/null 2>/dev/null",
-            shell=True,
-        )
-        if out != 0:
-            raise ValueError(f"Conversion failed {str(fname)}")
+    print(f"Converting {len(files)} files from AAC to WAV")
+    with tqdm(total=len(files)) as pbar, multiprocessing.Pool() as workers:
+        for file in files:
+            workers.apply_async(
+                convert_file,
+                args=(str(file),),
+                error_callback=lambda x: print(x),
+                callback=lambda _: pbar.update(1),
+            )
+
+        workers.close()
+        workers.join()
 
 
 ## ========== ===========
@@ -219,11 +234,11 @@ if __name__ == "__main__":
         concatenate(args, files)
 
         for file in files:
-            full_extract(args, os.path.join(args.save_path, file.split()[1]))
+            full_extract(args, os.path.join(args.save_path, "concat", file.split()[1]))
 
         save_path = pathlib.Path(args.save_path)
         out = subprocess.call(
-            f"mv {str(save_path/'dev'/'aac' / '*')} {str(save_path / 'aac/')} && rm -r {str(save_path / 'dev')}",
+            f"mv {str(save_path/'dev'/'aac')} {str(save_path / 'aac')} && rmdir {str(save_path / 'dev')}",
             shell=True,
         )
         out = subprocess.call(

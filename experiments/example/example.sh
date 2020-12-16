@@ -2,9 +2,10 @@
 #SBATCH --partition=csedu
 #SBATCH --account=nvaessen
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=24
 #SBATCH --time=00:30:00
 #SBATCH --gpus 1
+#SBATCH --cpus-per-task=6
+#SBATCH --mem-per-cpu=2GB
 
 DISK=/scratch-csedu/other/nik/
 DATA_PATH=$DISK/data/voxceleb/

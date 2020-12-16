@@ -6,11 +6,11 @@
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=6
 #SBATCH --mem-per-cpu=2GB
-#SBATCH -o /home/nvaessen/slurm/job_%j.out
-#SBATCH -e /home/nvaessen/slurm/job_%j.err
+#SBATCH -o /home/nvaessen/slurm/job_%j/out.txt
+#SBATCH -e /home/nvaessen/slurm/job_%j/err.txt
 
-DISK=/scratch-csedu/other/nik/
-DATA_PATH=$DISK/data/voxceleb/
+DISK=/scratch-csedu/other/nik
+DATA_PATH=$DISK/data/voxceleb
 SAVE_PATH=$DISK/experiments/speaker/voxceleb/example
 PROJECT_DIR=../../
 

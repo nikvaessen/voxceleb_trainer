@@ -6,6 +6,8 @@
 #SBATCH --gpus 1
 #SBATCH --cpus-per-task=6
 #SBATCH --mem-per-cpu=2GB
+#SBATCH -o /home/nvaessen/slurm/job_%j.out
+#SBATCH -e /home/nvaessen/slurm/job_%j.err
 
 DISK=/scratch-csedu/other/nik/
 DATA_PATH=$DISK/data/voxceleb/

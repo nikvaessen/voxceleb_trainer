@@ -3,7 +3,7 @@
 #SBATCH --account=nvaessen
 #SBATCH --nodes=1
 #SBATCH --time=00:30:00
-#!SBATCH --gpus 1
+#SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=6
 #SBATCH --mem-per-cpu=2GB
 #SBATCH -o /home/nvaessen/slurm/job_%j.out
@@ -13,6 +13,13 @@ DISK=/scratch-csedu/other/nik/
 DATA_PATH=$DISK/data/voxceleb/
 SAVE_PATH=$DISK/experiments/speaker/voxceleb/example
 PROJECT_DIR=../../
+
+echo "pwd: $(pwd)"
+echo "disk: $DISK"
+echo "data: $DATA_PATH"
+echo "save: $SAVE_PATH"
+echo "project: $PROJECT_DIR"
+echo "CUDA: $CUDA_VISIBLE_DEVICES"
 
 srun python $PROJECT_DIR/trainSpeakerNet.py \
 --model ResNetSE34L \

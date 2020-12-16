@@ -24,7 +24,7 @@ echo "CUDA: $CUDA_VISIBLE_DEVICES"
 srun python $PROJECT_DIR/trainSpeakerNet.py \
 --model ResNetSE34L \
 --trainfunc angleproto \
---batch_size 400 \
+--batch_size 200 \
 --nPerSpeaker 2 \
 --train_list $DATA_PATH/train_list.txt \
 --train_path $DATA_PATH/voxceleb2/ \

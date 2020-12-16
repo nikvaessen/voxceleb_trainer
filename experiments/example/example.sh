@@ -19,6 +19,7 @@ echo "disk: $DISK"
 echo "data: $DATA_PATH"
 echo "save: $SAVE_PATH"
 echo "project: $PROJECT_DIR"
+echo "python: $(whereis python)"
 echo "CUDA: $CUDA_VISIBLE_DEVICES"
 
 srun python $PROJECT_DIR/trainSpeakerNet.py \
